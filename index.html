@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cost to achieve 0.95 DE vs. Salvo WQI</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; margin:0; padding:24px; background:#fff; }
+  .wrap { max-width:1115px; margin:0 auto; }
+  h1 { font-size:21px; font-weight:700; margin:0 0 6px; }
+  p.subhead { font-size:12.5px; color:#555; margin:0 0 16px; line-height:1.6; max-width:920px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; color:#333; margin-bottom:10px; align-items:center; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .sw { width:20px; height:3px; display:inline-block; }
+  .sw.dash { background:repeating-linear-gradient(90deg,#777 0 6px, transparent 6px 9px); }
+  .dot { width:13px; height:13px; border-radius:50%; display:inline-block; box-sizing:border-box; }
+  .dot.solid { background:#555; } .dot.hollow { background:#fff; border:2px solid #555; }
+  .dot.hatch { background:repeating-linear-gradient(45deg,#222 0 2.2px,#fff 2.2px 4px); border:1px solid #222; }
+  .dot.hatchlight { background:repeating-linear-gradient(45deg,#bcbcbc 0 1.3px,#fff 1.3px 4.2px); border:1px solid #bbb; }
+  .rdot { width:12px;height:12px;border-radius:50%;background:#e4002b;display:inline-block; }
+  .rdia { width:11px;height:11px;background:#e4002b;display:inline-block;transform:rotate(45deg); }
+  .rring { width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #e4002b;display:inline-block;box-sizing:border-box; }
+  .controls { display:flex; flex-wrap:wrap; gap:16px 20px; margin:4px 0 12px; align-items:center; }
+  .grp { display:flex; gap:6px; align-items:center; }
+  .grp label { font-size:12px; color:#666; margin-right:2px; }
+  button { font-family:inherit; font-size:12.5px; padding:5px 11px; border:1px solid #bbb; background:#fff; border-radius:6px; cursor:pointer; color:#444; }
+  button.active { border-color:#1a1a1a; background:#f2f2f2; font-weight:600; color:#111; }
+  .figno { display:block; font-size:10.5px; font-weight:400; color:#888; margin-top:1px; }
+  button.tog[data-tog="mun"].active { color:#fff; }
+  #resetExplore { border-color:#c9a; } #resetExplore.hot { border-color:#e4002b; background:#fdeff1; color:#7a0016; font-weight:600; }
+  .vignettes { background:#f7f7f4; border:1px solid #e3e3dc; border-radius:8px; padding:8px 12px; }
+  .layout { display:flex; gap:16px; align-items:flex-start; }
+  .stepper { width:250px; flex:0 0 250px; border:1px solid #e3e3dc; border-radius:8px; padding:8px; background:#fbfbf9; }
+  .stepper .hd { font-size:11px; text-transform:uppercase; letter-spacing:0.03em; color:#888; margin:2px 4px 8px; line-height:1.3; }
+  .step { display:block; width:100%; text-align:left; margin:0 0 6px; padding:7px 9px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:12px; color:#333; line-height:1.3; }
+  .step .nm { font-weight:600; color:#222; } .step .ct { color:#7a0016; font-weight:600; }
+  .step.active { border-color:#7a0016; background:#fdeff1; }
+  .chartcol { flex:1; min-width:0; }
+  .chart-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; min-height:26px; gap:10px; }
+  .hint { font-size:11.5px; color:#999; font-style:italic; }
+  .chartbox { position:relative; width:100%; height:470px; }
+  .shapes { font-size:12px; color:#666; }
+  .divider { width:1px; height:22px; background:#ddd; }
+  .summary { font-size:12.5px; color:#333; background:#fdf7f8; border:1px solid #f0d9de; border-radius:8px; padding:9px 12px; margin-top:10px; line-height:1.5; }
+  .summary b { color:#7a0016; }
+  .stepnote { font-size:11.5px; color:#999; margin-top:8px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cost to achieve 0.95 DE vs. WQI</h1>
+  <p class="subhead" id="subhead">This interactive chart depicts how different WQI levels affect munitions expenditure and cost per salvo for different strikes. The charts plot the authors' WQI assumptions and invites the reader to explore different WQI levels.</p>
+
+  <div class="controls">
+    <div class="grp vignettes"><label>Vignettes</label>
+      <button data-f="basis" data-v="single" class="active">Single Aimpoint<span class="figno">(Fig. 2)</span></button>
+      <button data-f="basis" data-v="antiship">1 <em>Renhai</em>-class cruiser<span class="figno">(Fig. 3)</span></button>
+      <button data-f="basis" data-v="airbase">Huian Airbase &mdash; 80 aimpoints<span class="figno">(Fig. 4)</span></button>
+      <button data-f="basis" data-v="air57">Huian Airbase &mdash; 57 aimpoints<span class="figno">(Fig. 6)</span></button>
+      <button data-f="basis" data-v="air16">Huian Airbase &mdash; 16 aimpoints<span class="figno">(Fig. 7)</span></button>
+    </div>
+  </div>
+
+  <div id="singleControls">
+    <div class="legend">
+      <span><span class="sw" style="background:#2a78d6"></span>LRASM &mdash; $3.2M</span>
+      <span><span class="sw" style="background:#eb6834"></span>JASSM &mdash; $2.0M</span>
+      <span><span class="sw" style="background:#1baf7a"></span>HERON &mdash; $0.2M</span>
+      <span><span class="sw" style="background:#4a3aa7"></span>LUCAS &mdash; $0.1M</span>
+      <span><span class="sw dash"></span>Munitions per Aimpoint (Right Axis)</span>
+    </div>
+    <div class="legend">
+      <span style="color:#666;">Marker:</span>
+      <span><span class="dot solid"></span>Homogeneous, Defended</span>
+      <span><span class="dot hollow"></span>Homogeneous, Saturated</span>
+      <span><span class="dot hatch"></span>Multi-Wave, Defended</span>
+      <span><span class="dot hatchlight"></span>Multi-Wave, Saturated</span>
+    </div>
+    <div class="legend shapes">
+      <span>Shape = Aimpoint:</span><span>&#9679; Ship</span><span>&#9650; Soft</span><span>&#9632; Hard</span><span>&#9670; Buried</span>
+    </div>
+    <div class="controls">
+      <div class="grp"><label>Munition</label>
+        <button class="tog active" data-tog="mun" data-v="LRASM" style="border-color:#2a78d6;background:#2a78d6;">LRASM</button>
+        <button class="tog active" data-tog="mun" data-v="JASSM" style="border-color:#eb6834;background:#eb6834;">JASSM</button>
+        <button class="tog active" data-tog="mun" data-v="HERON" style="border-color:#1baf7a;background:#1baf7a;">HERON</button>
+        <button class="tog active" data-tog="mun" data-v="LUCAS" style="border-color:#4a3aa7;background:#4a3aa7;">LUCAS</button>
+      </div>
+      <div class="divider"></div>
+      <div class="grp"><label>Salvo Type</label>
+        <button data-f="panel" data-v="all" class="active">All</button>
+        <button data-f="panel" data-v="homog">Homogeneous</button>
+        <button data-f="panel" data-v="mixed">Multi-Wave</button>
+      </div>
+      <div class="grp"><label>State</label>
+        <button data-f="state" data-v="all" class="active">All</button>
+        <button data-f="state" data-v="Defended">Defended</button>
+        <button data-f="state" data-v="Saturated">Saturated</button>
+      </div>
+      <div class="grp"><label>Aimpoint</label>
+        <button data-f="ai" data-v="all" class="active">All</button>
+        <button data-f="ai" data-v="Ship">Ship</button>
+        <button data-f="ai" data-v="Soft">Soft</button>
+        <button data-f="ai" data-v="Hard">Hard</button>
+        <button data-f="ai" data-v="Buried">Buried</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="vignetteLegend" style="display:none;">
+    <div class="legend">
+      <span><span class="rdot"></span>Defended segment</span>
+      <span><span class="rdia"></span>Saturated segment</span>
+      <span><span class="rring"></span>WQI handle &mdash; drag along curve</span>
+      <span style="margin-left:6px; color:#888;">Bold lines = per-hardness cost curves</span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="stepper" id="stepper" style="display:none;">
+      <div class="hd">Salvo &mdash; authors' assumptions (table values)</div>
+      <div id="stepList"></div>
+    </div>
+    <div class="chartcol">
+      <div class="chart-head">
+        <span class="hint" id="dragHint" style="display:none;">Drag any red handle to change its WQI &mdash; the whole salvo re-solves live (saturation, remainders, and totals update).</span>
+        <button id="resetExplore" style="display:none;">Reset to authors' assumptions</button>
+      </div>
+      <div class="chartbox"><canvas id="chart"></canvas></div>
+      <div class="summary" id="summary" style="display:none;"></div>
+      <div class="stepnote" id="stepnote" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  // ================= engine =================
+  function qAP(e){ if(e<=0) return Infinity; if(e>=1) return 1; return Math.ceil(Math.log(0.05)/Math.log(1-e)); }
+  var UNIT  = { LRASM:3.2, JASSM:2.0, HERON:0.2, LUCAS:0.1 };
+  var HLC=['soft','hard','buried'];
+  function resolveHomog(mtx, mun, K, scout, T){
+    var kR=K>0?Math.max(0,K-scout):0, segs=[];
+    for(var i=0;i<3;i++){ var h=HLC[i], ap=T[h]; if(!ap) continue; var eb=mtx[h][0], ef=mtx[h][1];
+      if(eb<=0&&ef<=0) continue;
+      var qn=eb>0?qAP(eb):Infinity, tb=isFinite(qn)?qn*ap:Infinity;
+      if(K>0&&isFinite(tb)&&tb<=kR){ segs.push({mun:mun,ai:h,state:'Defended',count:tb,wqi:eb}); kR-=tb; }
+      else { var ft=ap>0?kR/ap:0, defC=Math.round(ft*ap), sv=eb>0?Math.pow(1-eb,ft):1;
+        if(defC>0) segs.push({mun:mun,ai:h,state:'Defended',count:defC,wqi:eb});
+        if(ef>0){ var x=Math.ceil(Math.log(0.05/sv)/Math.log(1-ef)); var satC=Math.ceil((ft+x)*ap)-defC; if(satC>0) segs.push({mun:mun,ai:h,state:'Saturated',count:satC,wqi:ef}); }
+        kR=0; } }
+    return segs;
+  }
+  function resolveDist(Lw, Jw, scout, K, T){
+    var ch={}, nb={}, nS=0, lAP=0, fAP=0, i,h;
+    for(i=0;i<3;i++){ h=HLC[i]; var ap=T[h]; if(!ap){ch[h]={ap:0,st:'none'};continue;}
+      var ebL=Lw[h][0], ebJ=Jw[h][0], qL=qAP(ebL), qJ=qAP(ebJ), fL=isFinite(qL), fJ=isFinite(qJ);
+      var cL=fL?qL*ap*UNIT.LUCAS:Infinity, cJ=fJ?qJ*ap*UNIT.JASSM:Infinity, p=null; if(fL&&fJ)p=cL<=cJ?'L':'J'; else if(fL)p='L'; else if(fJ)p='J';
+      if(!p){ch[h]={ap:ap,st:'uns'};continue;} ch[h]={ap:ap,st:'ok',p:p}; var eb=p==='L'?ebL:ebJ,q=qAP(eb); nb[h]={q:q,p:p}; nS+=q*ap; if(p==='L')lAP+=ap; else fAP+=ap; }
+    var sat=K>0&&(scout+nS)>K, kAS=sat?Math.max(0,K-scout):0, ftL=(sat&&lAP>0)?kAS/lAP:0, segs=[], lStrike=0;
+    for(i=0;i<3;i++){ h=HLC[i]; var c=ch[h]; if(c.st!=='ok'||c.p!=='L')continue; var eb=Lw[h][0], ef=Lw[h][1];
+      if(!sat){ segs.push({mun:'LUCAS',ai:h,state:'Defended',count:nb[h].q*c.ap,wqi:eb}); lStrike+=nb[h].q*c.ap; }
+      else { var defC=Math.round(ftL*c.ap), sv=eb>0?Math.pow(1-eb,ftL):1;
+        if(defC>0){ segs.push({mun:'LUCAS',ai:h,state:'Defended',count:defC,wqi:eb}); lStrike+=defC; }
+        if(ef>0){ var x=Math.ceil(Math.log(0.05/sv)/Math.log(1-ef)); var tot=Math.ceil((ftL+x)*c.ap); var satC=tot-defC; if(satC>0){ segs.push({mun:'LUCAS',ai:h,state:'Saturated',count:satC,wqi:ef}); lStrike+=satC; } } } }
+    var kAL=sat?Math.max(0,kAS-lStrike):0, ftF=(sat&&fAP>0)?kAL/fAP:0;
+    for(i=0;i<3;i++){ h=HLC[i]; var c2=ch[h]; if(c2.st!=='ok'||c2.p!=='J')continue; var eb=Jw[h][0], ef=Jw[h][1];
+      if(!sat){ segs.push({mun:'JASSM',ai:h,state:'Defended',count:nb[h].q*c2.ap,wqi:eb}); }
+      else { var defC2=Math.round(ftF*c2.ap), sv2=eb>0?Math.pow(1-eb,ftF):1;
+        if(defC2>0) segs.push({mun:'JASSM',ai:h,state:'Defended',count:defC2,wqi:eb});
+        if(ef>0){ var x2=Math.ceil(Math.log(0.05/sv2)/Math.log(1-ef)); var satC2=Math.ceil((ftF+x2)*c2.ap)-defC2; if(satC2>0) segs.push({mun:'JASSM',ai:h,state:'Saturated',count:satC2,wqi:ef}); } } }
+    return segs;
+  }
+  var MBASE = {
+    hJ:{soft:[.450,.810],hard:[.405,.729],buried:[.360,.648]},
+    hL:{soft:[.036,.542],hard:[.004,.064],buried:[.000,.000]},
+    mJ:{soft:[.665,.855],hard:[.599,.770],buried:[.532,.684]},
+    mL:{soft:[.191,.574],hard:[.023,.068],buried:[.000,.000]}
+  };
+  var TLC = {soft:59,hard:18,buried:3};
+  function curT(){ var s=SETS[filt.basis]||{}; return {soft:s.Soft||0, hard:s.Hard||0, buried:s.Buried||0}; }
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+  // ================= chart building blocks =================
+  function qReq(w){ return qAP(w); }
+  function lineData(unit, factor){ var a=[]; for(var w=0.004; w<=0.9509; w+=0.002){ a.push({x:Math.round(w*10000)/10000, y:Math.round(unit*factor*qAP(w)*100)/100}); } return a; }
+  function munData(factor){ var a=[]; for(var w=0.004; w<=0.9509; w+=0.002){ a.push({x:Math.round(w*10000)/10000, y:qAP(w)*factor}); } return a; }
+  function fmtM(y){ return '$' + (y>=100 ? Math.round(y).toLocaleString() : y.toFixed(2)) + 'M'; }
+
+  var COLOR = { LRASM:'#2a78d6', JASSM:'#eb6834', HERON:'#1baf7a', LUCAS:'#4a3aa7' };
+  var SHAPE = { Ship:'circle', Soft:'triangle', Hard:'rect', Buried:'rectRot' };
+  var HAS   = { LRASM:{Ship:1}, HERON:{Ship:1}, JASSM:{Soft:1,Hard:1,Buried:1}, LUCAS:{Soft:1,Hard:1} };
+  function vigOf(m){ return (m==='LRASM'||m==='HERON') ? 'anti' : 'air'; }
+  var SETS = { single:{Ship:1,Soft:1,Hard:1,Buried:1}, antiship:{Ship:1}, airbase:{Soft:59,Hard:18,Buried:3}, air57:{Soft:38,Hard:16,Buried:3}, air16:{Soft:14,Hard:2,Buried:0} };
+  var AXIS = {
+    single:   { min:0.1, max:500,  r:200,  title:'Salvo Cost to Achieve 0.95 DE ($M)' },
+    antiship: { min:0.1, max:500,  r:200,  title:'Salvo Cost, 1 Renhai-class Cruiser ($M)' },
+    airbase:  { min:1,   max:3000, r:1000, title:'Huian Airbase Vignette Cost, 80 Aimpoints ($M)' },
+    air57:    { min:1,   max:2000, r:1000, title:'Huian Airbase Vignette Cost, 57 Aimpoints ($M)' },
+    air16:    { min:1,   max:1000, r:1000, title:'Huian Airbase Vignette Cost, 16 Aimpoints ($M)' }
+  };
+  var SUBHEAD = {
+    single: "This interactive chart depicts how different WQI levels affect munitions expenditure and cost per salvo for a single aimpoint. The colored lines show each munition's cost curve; the shaped markers show the authors' WQI assumptions by aimpoint type and defense state.",
+    antiship: "Step through each salvo in the anti-ship results table. The red path traces how the munitions are assembled; segment counts sum to the table total. Drag a red point along its cost curve to explore a different WQI.",
+    airbase: "Step through each salvo in the airbase results table. The red path traces how the munitions are assembled as defenses shift from defended to saturated. Drag any red handle to change a WQI and the whole salvo re-solves live \u2014 saturation, remainders, and totals recompute from the calculator model."
+  };
+
+  function mix(hex,f,t){ var n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; r=Math.round(r+(t-r)*f); g=Math.round(g+(t-g)*f); b=Math.round(b+(t-b)*f); return 'rgb('+r+','+g+','+b+')'; }
+  function lighten(hex,f){ return mix(hex,f,255); } function darken(hex,f){ return mix(hex,f,0); }
+  function shadeFor(m,ai){ if(ai==='Hard') return darken(COLOR[m],0.25); if(ai==='Buried') return darken(COLOR[m],0.45); return COLOR[m]; }
+  function toRgba(c,a){ if(c[0]==='#'){ var n=parseInt(c.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; } if(c.indexOf('rgb(')===0){ return c.replace('rgb(','rgba(').replace(')',','+a+')'); } return c; }
+  function hatch(color,lw){ var c=document.createElement('canvas'); c.width=6;c.height=6; var g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,6,6); g.strokeStyle=color; g.lineWidth=lw||1.7; g.beginPath(); g.moveTo(0,6);g.lineTo(6,0); g.moveTo(-3,3);g.lineTo(3,-3); g.moveTo(3,9);g.lineTo(9,3); g.stroke(); return g.createPattern(c,'repeat'); }
+  var HATCH={}, HATCHL={};
+  Object.keys(COLOR).forEach(function(m){ HATCH[m]=hatch(darken(COLOR[m],0.28),2.4); HATCHL[m]=hatch(lighten(COLOR[m],0.55),1.3); });
+
+  var P = [
+    ['LRASM','Ship','homog','Defended',0.4356,6,19.2],['LRASM','Ship','homog','Saturated',0.7128,3,9.6],
+    ['HERON','Ship','homog','Defended',0.02125,140,28.0],['HERON','Ship','homog','Saturated',0.31875,8,1.6],
+    ['JASSM','Soft','homog','Defended',0.45,6,12.0],['JASSM','Soft','homog','Saturated',0.81,2,4.0],
+    ['JASSM','Hard','homog','Defended',0.405,6,12.0],['JASSM','Hard','homog','Saturated',0.729,3,6.0],
+    ['JASSM','Buried','homog','Defended',0.36,7,14.0],['JASSM','Buried','homog','Saturated',0.648,3,6.0],
+    ['LUCAS','Soft','homog','Defended',0.036125,82,8.2],['LUCAS','Soft','homog','Saturated',0.541875,4,0.4],
+    ['LUCAS','Hard','homog','Defended',0.00425,704,70.4],['LUCAS','Hard','homog','Saturated',0.06375,46,4.6],
+    ['LRASM','Ship','mixed','Defended',0.65835,3,9.6],['LRASM','Ship','mixed','Saturated',0.84645,2,6.4],
+    ['HERON','Ship','mixed','Defended',0.1275,22,4.4],['HERON','Ship','mixed','Saturated',0.478125,5,1.0],
+    ['JASSM','Soft','mixed','Defended',0.665,3,6.0],['JASSM','Soft','mixed','Saturated',0.855,2,4.0],
+    ['JASSM','Hard','mixed','Defended',0.5985,4,8.0],['JASSM','Hard','mixed','Saturated',0.7695,3,6.0],
+    ['JASSM','Buried','mixed','Defended',0.532,4,8.0],['JASSM','Buried','mixed','Saturated',0.684,3,6.0],
+    ['LUCAS','Soft','mixed','Defended',0.19125,15,1.5],['LUCAS','Soft','mixed','Saturated',0.57375,4,0.4],
+    ['LUCAS','Hard','mixed','Defended',0.0225,132,13.2],['LUCAS','Hard','mixed','Saturated',0.0675,43,4.3]
+  ].map(function(r){ return { m:r[0], ai:r[1], panel:r[2], state:r[3], x:r[4], req:r[5], y:r[6] }; });
+
+  // ================= salvo definitions =================
+  var SALVOS = {
+    antiship: [
+      { name:'Homog. LRASM', type:'static', muns:['LRASM'], scout:null, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:6,wqi:0.4356}] },
+      { name:'Homog. HERON', type:'static', muns:['HERON'], scout:null, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:140,wqi:0.02125}] },
+      { name:'Scout HERON + LRASM', type:'static', muns:['LRASM'], scout:{mun:'HERON',count:25}, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:3,wqi:0.65835}] },
+      { name:'Scout HERON + HERON', type:'static', muns:['HERON'], scout:{mun:'HERON',count:25}, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:22,wqi:0.1275}] }
+    ],
+    airbase: [
+      { name:'Homog. JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.hJ, scout:null, K:350, note:'' },
+      { name:'Homog. LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.hL, scout:null, K:350, note:'Buried targets unserviced' },
+      { name:'Scout/Decoy + JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.mJ, scout:{mun:'LUCAS',count:25}, K:350, note:'' },
+      { name:'Scout/Decoy + LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.mL, scout:{mun:'LUCAS',count:25}, K:350, note:'Buried targets unserviced' },
+      { name:'Distribute by Hardness', type:'dist', muns:['LUCAS','JASSM'], baseL:MBASE.hL, baseJ:MBASE.hJ, scout:null, K:350, note:'' },
+      { name:'Scout/Decoy + Distribute', type:'dist', muns:['LUCAS','JASSM'], baseL:MBASE.mL, baseJ:MBASE.mJ, scout:{mun:'LUCAS',count:25}, K:350, note:'' }
+    ]
+  };
+  SALVOS.air57 = SALVOS.airbase;
+  SALVOS.air16 = SALVOS.airbase;
+  var filt = { basis:'single', panel:'all', state:'all', ai:'all' };
+  var munOn = { LRASM:true, JASSM:true, HERON:true, LUCAS:true };
+  var vigOn = { anti:true, air:true };
+  var STATE = { selected:{ antiship:0, airbase:0, air57:0, air16:0 } };
+  var curSalvo=null, workM=null, curSegs=[], baseSegs=[], curScout=null, curNote='', modified=false;
+  var singleOverrides = {};
+  var animSegs=null, animating=false, animRAF=null;
+  function renderSegs(){ return animSegs || curSegs; }
+  var pathIdx=-1, ghostIdx=-1;
+
+  function munVisible(m){ return munOn[m] && vigOn[vigOf(m)]; }
+  function countFor(ai){ var c = SETS[filt.basis][ai]; return (c===undefined) ? 0 : c; }
+  function visible(p){
+    if (!munVisible(p.m)) return false;
+    if (countFor(p.ai) === 0) return false;
+    if (filt.panel !== 'all' && p.panel !== filt.panel) return false;
+    if (filt.state !== 'all' && p.state !== filt.state) return false;
+    if (filt.ai   !== 'all' && p.ai   !== filt.ai)   return false;
+    return true;
+  }
+  function fillFor(p){ if (p.panel==='homog') return p.state==='Defended' ? COLOR[p.m] : '#ffffff'; return p.state==='Defended' ? HATCH[p.m] : HATCHL[p.m]; }
+  function lineDS(name, color, unit, factor){ return { label:name, yAxisID:'yCost', data:lineData(unit,factor), borderColor:color, borderWidth:1.8, pointRadius:0, tension:0.15, order:8 }; }
+  function buildLines(){ var out=[]; ['LRASM','JASSM','HERON','LUCAS'].forEach(function(m){ if(!munVisible(m)) return; out.push(lineDS(m, COLOR[m], UNIT[m], 1)); }); return out; }
+  function ptId(p){ return p.m+'|'+p.ai+'|'+p.panel+'|'+p.state; }
+  function pointDataset(){
+    var pts = P.filter(visible);
+    return { label:'Salvo points', yAxisID:'yCost', showLine:false, order:100,
+      data: pts.map(function(p){ var id=ptId(p); var w=(singleOverrides[id]!==undefined)?singleOverrides[id]:p.x; var q=qAP(w); var yv=Math.round(UNIT[p.m]*q*100)/100; return { x:w, y:yv, req:q, m:p.m, ai:p.ai, panel:p.panel, state:p.state, id:id, moved:(singleOverrides[id]!==undefined), bx:p.x, by:p.y }; }),
+      pointStyle: pts.map(function(p){ return SHAPE[p.ai]; }),
+      pointRadius: pts.map(function(p){ return (p.ai==='Soft'||p.ai==='Buried')?8:7; }),
+      pointHoverRadius: 10, backgroundColor: pts.map(fillFor), borderColor: pts.map(function(p){ return shadeFor(p.m,p.ai); }), borderWidth: 2 };
+  }
+  function greyDS(){ return { label:'Munitions per aimpoint (right axis)', yAxisID:'yMun', data:munData(1), borderColor:'#888', borderWidth:2.5, pointRadius:0, tension:0.15, borderDash:[2,3], order:9 }; }
+  function stepperBoldLines(salvo){
+    var out=[];
+    salvo.muns.forEach(function(m){
+      if (filt.basis==='antiship'){ var d=lineDS(m+' Ship \u2014 1 aimpoint',toRgba(COLOR[m],0.85),UNIT[m],1); d.borderWidth=2.6; d.endLabel=m+' Ship \u2014 1 aimpoint'; out.push(d); }
+      else { ['Soft','Hard','Buried'].forEach(function(ai){ if(!HAS[m][ai]) return; var c=SETS[filt.basis][ai]; if(!c) return; var d=lineDS(m+' '+ai+' \u2014 '+c+' aimpoint'+(c>1?'s':''), toRgba(shadeFor(m,ai),0.8), UNIT[m], c); d.borderWidth=2.4; d.endLabel=m+' '+ai+' \u2014 '+c+' aimpoint'+(c>1?'s':''); out.push(d); }); }
+    });
+    return out;
+  }
+
+  // ---- resolve current working salvo into mapped segments ----
+  function resolveCur(){
+    if (curSalvo.type==='static') return curSalvo.segs;
+    if (curSalvo.type==='homog') return resolveHomog(workM, curSalvo.mun, curSalvo.K, curSalvo.scout?curSalvo.scout.count:0, curT());
+    return resolveDist(workM.L, workM.J, curSalvo.scout?curSalvo.scout.count:0, curSalvo.K, curT());
+  }
+  function mapSegs(raw){
+    return raw.map(function(g){ var aiLC=g.ai.toLowerCase(); var disp=cap(aiLC);
+      var ap=(filt.basis==='antiship')?1:(curT()[aiLC]||1);
+      var cy=Math.round(UNIT[g.mun]*ap*qAP(g.wqi)*100)/100;
+      var cost=Math.round(g.count*UNIT[g.mun]*100)/100;
+      return { mun:g.mun, ai:disp, aiLC:aiLC, state:g.state, ap:ap, wqi:g.wqi, count:g.count, cost:cost, curveY:cy, capped: cost < cy-0.02, stateIdx:(g.state==='Saturated'?1:0) };
+    });
+  }
+  function buildCurSegs(salvo){
+    animSegs=null; animating=false; if(animRAF) cancelAnimationFrame(animRAF);
+    curSalvo=salvo; curScout=salvo.scout; curNote=salvo.note; modified=false;
+    if (salvo.type==='static'){ workM=null; baseSegs=mapSegs(salvo.segs); curSegs=mapSegs(salvo.segs); }
+    else if (salvo.type==='homog'){ workM=clone(salvo.baseM); baseSegs=mapSegs(resolveHomog(salvo.baseM,salvo.mun,salvo.K,salvo.scout?salvo.scout.count:0,curT())); curSegs=mapSegs(resolveCur()); }
+    else { workM={L:clone(salvo.baseL), J:clone(salvo.baseJ)}; baseSegs=mapSegs(resolveDist(salvo.baseL,salvo.baseJ,salvo.scout?salvo.scout.count:0,salvo.K,curT())); curSegs=mapSegs(resolveCur()); }
+  }
+
+  function segLineDS(){
+    var pts=renderSegs().map(function(s){ return { x:s.wqi, y:s.cost, seg:s }; });
+    return { label:'SalvoLine', yAxisID:'yCost', order:199, data:pts, showLine:true,
+      borderColor:'#e4002b', borderWidth:1.6, borderDash:[5,3], tension:0, pointRadius:0, pointHoverRadius:0, pointHitRadius:0 };
+  }
+  function segPointsDS(){
+    var pts=curSegs.map(function(s){ return { x:s.wqi, y:s.cost, seg:s }; });
+    return { label:'SalvoPoints', yAxisID:'yCost', order:201, data:pts, showLine:false,
+      pointStyle: pts.map(function(p){ return p.seg.state==='Saturated'?'rectRot':'circle'; }),
+      pointRadius: pts.map(function(p){ return p.seg.capped?6:8; }),
+      pointHoverRadius:11,
+      pointBackgroundColor: pts.map(function(p){ return p.seg.capped?'#f4a6b4':'#e4002b'; }),
+      pointBorderColor:'#7a0016', pointBorderWidth:2 };
+  }
+  function baseGhostDS(){
+    return { label:'BaseGhost', yAxisID:'yCost', order:150, hidden:!modified,
+      data: baseSegs.map(function(s){ return { x:s.wqi, y:s.cost }; }), showLine:true,
+      borderColor:'rgba(120,120,120,0.55)', borderWidth:1.4, borderDash:[3,3], tension:0,
+      pointRadius:3, pointBackgroundColor:'rgba(120,120,120,0.55)', pointBorderColor:'rgba(120,120,120,0.55)' };
+  }
+  function allDatasets(){
+    if (filt.basis==='single'){ return buildLines().concat([greyDS(), pointDataset()]); }
+    return stepperBoldLines(curSalvo).concat([ baseGhostDS(), segLineDS(), segPointsDS() ]);
+  }
+  function findIdx(label){ if(!chart) return -1; for(var i=0;i<chart.data.datasets.length;i++){ if(chart.data.datasets[i].label===label) return i; } return -1; }
+
+  var LEFT_TICKS = [0.1,0.2,0.5,1,2,5,10,20,50,100,200,500,1000,2000,3000,5000];
+  var RIGHT_TICKS = [1,2,5,10,20,50,100,200,500,1000];
+  function tickFilter(cands){ return function(axis){ var lo=axis.min, hi=axis.max, out=[]; cands.forEach(function(v){ if(v>=lo*0.9999 && v<=hi*1.0001) out.push({value:v}); }); if(out.length) axis.ticks=out; }; }
+
+  // tethered handles for capped points
+  var handlePlugin = { id:'handles', afterDatasetsDraw:function(ch){
+    if(filt.basis==='single') return; var ctx=ch.ctx,x=ch.scales.x,y=ch.scales.yCost;
+    var firstCapped=null, minx=Infinity; curSegs.forEach(function(s){ if(s.capped && s.wqi<minx){ minx=s.wqi; firstCapped=s; } });
+    curSegs.forEach(function(s){ if(!s.capped) return; var hx=x.getPixelForValue(s.wqi), hy=y.getPixelForValue(s.curveY), ry=y.getPixelForValue(s.cost);
+      ctx.save(); ctx.strokeStyle='rgba(228,0,43,0.55)'; ctx.setLineDash([3,3]); ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx,ry); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(hx,hy,6,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill(); ctx.lineWidth=2.2; ctx.strokeStyle='#e4002b'; ctx.stroke();
+      if(s===firstCapped){ ctx.font='italic 9px Arial'; ctx.fillStyle='rgba(122,0,22,0.75)'; ctx.textAlign='left'; ctx.fillText('drag WQI', hx+9, hy-1); }
+      ctx.restore(); });
+  } };
+  // segment count labels + scout sub-label
+  var segLabels = { id:'segLabels', afterDatasetsDraw:function(ch){
+    if(filt.basis==='single') return; var di=findIdx('SalvoPoints'); if(di<0) return; var ctx=ch.ctx, ds=ch.data.datasets[di], meta=ch.getDatasetMeta(di), area=ch.chartArea;
+    ctx.save(); ctx.font='700 10.5px Arial'; ctx.textBaseline='middle';
+    var L=[];
+    meta.data.forEach(function(pt,i){ var s=ds.data[i].seg; if(s.synthetic) return; var txt=s.count.toLocaleString()+' '+s.mun+' '+s.ai+' ('+(s.state==='Saturated'?'sat':'def')+')'; var w=ctx.measureText(txt).width; var cx=Math.min(Math.max(pt.x, area.left+w/2+4), area.right-w/2-4); L.push({txt:txt, w:w, cx:cx, cy:pt.y-13, py:pt.y}); });
+    var placed=[];
+    L.slice().sort(function(a,b){ return a.cx-b.cx; }).forEach(function(lab){ var g=0; while(g++<12){ var hit=false; for(var k=0;k<placed.length;k++){ var p=placed[k]; if(Math.abs(lab.cx-p.cx) < (lab.w+p.w)/2+6 && Math.abs(lab.cy-p.cy) < 14){ lab.cy=p.cy-14; hit=true; } } if(!hit) break; } if(lab.cy < area.top+8) lab.cy=lab.py+16; placed.push(lab); });
+    ctx.textAlign='center'; ctx.fillStyle='#a3001a';
+    L.forEach(function(lab){ ctx.fillText(lab.txt, lab.cx, lab.cy); });
+    if(curScout && meta.data[0]){ var p0=meta.data[0]; ctx.font='italic 10px Arial'; ctx.fillStyle='#8a8a8a'; var pl=curScout.mun+(/S$/.test(curScout.mun)?'':'s'); var stxt='(+'+curScout.count+' Scout '+pl+')'; var sw=ctx.measureText(stxt).width; var scx=Math.min(Math.max(p0.x, area.left+sw/2+4), area.right-sw/2-4); ctx.textAlign='center'; ctx.fillText(stxt, scx, p0.y+16); }
+    ctx.restore();
+  } };
+  // sequence arrows (+ "air defenses saturated" on def->sat crossing)
+  function arrowHead(ctx,x,y,ang){ var s=6; ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(s,0); ctx.lineTo(-s,-s*0.72); ctx.lineTo(-s,s*0.72); ctx.closePath(); ctx.fillStyle='#e4002b'; ctx.fill(); ctx.restore(); }
+  var arrowPlugin = { id:'arrows', afterDatasetsDraw:function(ch){
+    if(filt.basis==='single') return; var di=findIdx('SalvoLine'); if(di<0) return; var ctx=ch.ctx, ds=ch.data.datasets[di], meta=ch.getDatasetMeta(di);
+    for(var i=0;i<meta.data.length-1;i++){ var p1=meta.data[i], p2=meta.data[i+1]; if(!p1||!p2) continue; var s1=ds.data[i].seg, s2=ds.data[i+1].seg;
+      var mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2, ang=Math.atan2(p2.y-p1.y,p2.x-p1.x), frontier=s2.synthetic;
+      if(!frontier) arrowHead(ctx,mx,my,ang);
+      var callout = (s1.state==='Defended') && ((!frontier && s2.state==='Saturated') || (frontier && s2.willSat));
+      if (callout){ ctx.save(); ctx.font='italic 700 10px Arial'; ctx.fillStyle='#a3001a'; ctx.textAlign='center'; var nx=-(p2.y-p1.y), ny=(p2.x-p1.x), nl=Math.hypot(nx,ny)||1; nx/=nl; ny/=nl; ctx.fillText('air defenses saturated', mx+nx*14, my+ny*14+3); ctx.restore(); }
+    }
+  } };
+
+  function solidColor(c){ if(c.indexOf('rgba(')===0){ return c.replace('rgba(','rgb(').replace(/,\s*[\d.]+\)\s*$/,')'); } return c; }
+  var lineEndLabels = { id:'lineEnds', afterDatasetsDraw:function(ch){
+    if(filt.basis==='single') return; var ctx=ch.ctx, area=ch.chartArea, y=ch.scales.yCost, items=[];
+    ch.data.datasets.forEach(function(ds){ if(!ds.endLabel) return; var last=ds.data[ds.data.length-1]; if(!last) return; items.push({ y:y.getPixelForValue(last.y), color:ds.borderColor, text:ds.endLabel }); });
+    if(!items.length) return;
+    items.sort(function(a,b){ return a.y-b.y; });
+    var gap=13, bot=area.bottom-2;
+    for(var i=1;i<items.length;i++){ if(items[i].y < items[i-1].y+gap) items[i].y=items[i-1].y+gap; }
+    for(var j=items.length-1;j>0;j--){ if(items[j].y>bot){ items[j].y=bot; if(items[j-1].y>items[j].y-gap) items[j-1].y=items[j].y-gap; } }
+    ctx.save(); ctx.font='600 10.5px Arial'; ctx.textBaseline='middle'; ctx.textAlign='left';
+    items.forEach(function(it){ ctx.fillStyle=solidColor(it.color); ctx.fillText(it.text, area.right+6, it.y); });
+    ctx.restore();
+  } };
+  var singleGhost = { id:'singleGhost', afterDatasetsDraw:function(ch){ if(filt.basis!=='single') return; var di=findIdx('Salvo points'); if(di<0) return; var ctx=ch.ctx,x=ch.scales.x,y=ch.scales.yCost, ds=ch.data.datasets[di];
+    ds.data.forEach(function(d){ if(!d.moved) return; var px=x.getPixelForValue(d.bx), py=y.getPixelForValue(d.by); ctx.save(); ctx.beginPath(); ctx.arc(px,py,5,0,2*Math.PI); ctx.strokeStyle='rgba(90,90,90,0.5)'; ctx.setLineDash([2,2]); ctx.lineWidth=1.4; ctx.stroke(); ctx.setLineDash([]); ctx.restore(); }); } };
+  var singleLabels = { id:'singleLabels', afterDatasetsDraw:function(ch){ if(filt.basis!=='single') return; var di=findIdx('Salvo points'); if(di<0) return; var ctx=ch.ctx, meta=ch.getDatasetMeta(di), ds=ch.data.datasets[di], area=ch.chartArea, act=(dragMode==='single'?dragIdx:-1);
+    ctx.save(); ctx.font='700 10px Arial'; ctx.fillStyle='#333'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+    meta.data.forEach(function(pt,i){ var d=ds.data[i]; if(!d.moved && i!==act) return; var txt=d.req+' \u00B7 '+fmtM(d.y); var w=ctx.measureText(txt).width; var cx=Math.min(Math.max(pt.x, area.left+w/2+4), area.right-w/2-4); ctx.fillText(txt, cx, pt.y-9); });
+    ctx.restore(); } };
+
+  var chart = new Chart(document.getElementById('chart'), {
+    type:'line', data:{ datasets: allDatasets() },
+    options:{
+      responsive:true, maintainAspectRatio:false, parsing:false, animation:false,
+      layout:{ padding:{ right:20, top:22 } },
+      interaction:{ mode:'nearest', intersect:true },
+      plugins:{
+        legend:{ display:false, position:'top', labels:{ boxWidth:24, boxHeight:2, font:{size:11}, color:'#555', filter:function(it){ return ['SalvoLine','SalvoPoints','BaseGhost','Salvo points'].indexOf(it.text)<0; } }, onClick:function(){} },
+        tooltip:{ callbacks:{ label:function(c){
+          var r=c.raw;
+          if (r && r.seg){ var s=r.seg; return s.count.toLocaleString()+' '+s.mun+' \u00B7 '+s.ai+' \u00B7 '+s.state+' \u00B7 WQI '+(Math.round(s.wqi*1000)/1000)+' \u00B7 '+fmtM(r.y); }
+          if (r && r.m){ var salvo=r.panel==='mixed'?'Multi-Wave':'Homogeneous'; return r.m+', '+r.ai+', '+salvo+', '+r.state+'  |  WQI '+r.x+'  \u00B7  '+r.req+' munitions  \u00B7  '+fmtM(r.y); }
+          if (c.dataset.label==='Munitions per aimpoint (right axis)') return 'Munitions per aimpoint: '+c.parsed.y;
+          if (c.dataset.label==='BaseGhost') return 'Authors\u2019 baseline';
+          return c.dataset.label+'  \u00B7  '+fmtM(c.parsed.y)+' at WQI '+c.parsed.x;
+        } } }
+      },
+      scales:{
+        x:{ type:'linear', min:0, max:0.95, title:{display:true,text:'Weapon Quality Index (WQI)',color:'#666'}, ticks:{color:'#666',stepSize:0.1}, grid:{color:'#eee'} },
+        yCost:{ type:'logarithmic', position:'left', min:0.1, max:500, title:{display:true,text:'Salvo Cost to Achieve 0.95 DE ($M)',color:'#666'}, afterBuildTicks: tickFilter(LEFT_TICKS), ticks:{color:'#666',callback:function(v){ return fmtM(v); }}, grid:{color:'#eee'} },
+        yMun:{ type:'logarithmic', position:'right', min:1, max:200, title:{display:true,text:'Munitions per Aimpoint (Grey Dotted Line Only)',color:'#8a8a8a', font:{style:'italic'}}, afterBuildTicks: tickFilter(RIGHT_TICKS), ticks:{color:'#8a8a8a',callback:function(v){ return v.toLocaleString(); }}, border:{ display:true, color:'#8a8a8a', dash:[2,3], width:1.5 }, grid:{drawOnChartArea:false} }
+      }
+    },
+    plugins:[handlePlugin, segLabels, arrowPlugin, lineEndLabels, singleGhost, singleLabels]
+  });
+
+  function salvoTotalsBase(s){
+    var raw = s.type==='static' ? s.segs : (s.type==='homog' ? resolveHomog(s.baseM,s.mun,s.K,s.scout?s.scout.count:0,curT()) : resolveDist(s.baseL,s.baseJ,s.scout?s.scout.count:0,s.K,curT()));
+    var m=(s.scout?s.scout.count:0), c=(s.scout?s.scout.count*UNIT[s.scout.mun]:0); raw.forEach(function(g){ m+=g.count; c+=g.count*UNIT[g.mun]; }); return { muns:m, cost:Math.round(c*100)/100 };
+  }
+  function renderStepList(){
+    var host=document.getElementById('stepList'); host.innerHTML='';
+    (SALVOS[filt.basis]||[]).forEach(function(s,i){ var t=salvoTotalsBase(s);
+      var b=document.createElement('button'); b.className='step'+(i===STATE.selected[filt.basis]?' active':'');
+      b.innerHTML='<span class="nm">'+(i+1)+'. '+s.name+'</span><br><span class="ct">'+t.muns.toLocaleString()+' muns \u00B7 '+fmtM(t.cost)+'</span>';
+      b.addEventListener('click', function(){ STATE.selected[filt.basis]=i; buildCurSegs(SALVOS[filt.basis][i]); renderStepList(); triggerAnim(); refresh(); });
+      host.appendChild(b);
+    });
+  }
+  function curTotals(){ var m=(curScout?curScout.count:0), c=(curScout?curScout.count*UNIT[curScout.mun]:0); curSegs.forEach(function(s){ m+=s.count; c+=s.count*UNIT[s.mun]; }); return { muns:m, cost:Math.round(c*100)/100 }; }
+  function updateSummary(){
+    var t=curTotals(), parts=[]; if(curScout) parts.push(curScout.count+' scout '+curScout.mun);
+    curSegs.forEach(function(s){ parts.push(s.count.toLocaleString()+' '+s.mun+' '+s.ai.toLowerCase()+' ('+(s.state==='Saturated'?'saturated':'defended')+')'); });
+    document.getElementById('summary').innerHTML='<b>'+curSalvo.name+'</b> &mdash; '+parts.join(' + ')+' = <b>'+t.muns.toLocaleString()+' munitions, '+fmtM(t.cost)+'</b>'+(curNote?('  ('+curNote+')'):'')+(modified?'  <span style="color:#999;">(modified \u2014 reset to restore authors\u2019 assumptions)</span>':'');
+    document.getElementById('resetExplore').classList.toggle('hot', modified);
+  }
+
+  function refresh(){
+    var isSingle=(filt.basis==='single');
+    document.getElementById('singleControls').style.display = isSingle?'block':'none';
+    document.getElementById('vignetteLegend').style.display = isSingle?'none':'block';
+    document.getElementById('stepper').style.display = isSingle?'none':'block';
+    document.getElementById('summary').style.display = isSingle?'none':'block';
+    document.getElementById('stepnote').style.display = 'none';
+    document.getElementById('dragHint').style.display = 'inline';
+    document.getElementById('dragHint').textContent = isSingle ? 'Drag any point along its curve to explore a different WQI \u2014 count and cost update live.' : 'Drag any red handle to change its WQI \u2014 the whole salvo re-solves live (saturation, remainders, and totals update).';
+    document.getElementById('resetExplore').style.display = isSingle ? (Object.keys(singleOverrides).length>0?'inline-block':'none') : 'inline-block';
+    document.getElementById('resetExplore').classList.toggle('hot', isSingle ? Object.keys(singleOverrides).length>0 : modified);
+
+    chart.data.datasets = allDatasets();
+    var ax=AXIS[filt.basis];
+    chart.options.scales.yCost.min=ax.min; chart.options.scales.yCost.max=ax.max; chart.options.scales.yCost.title.text=ax.title;
+    chart.options.scales.yMun.display=isSingle; chart.options.scales.yMun.max=ax.r;
+    chart.options.plugins.legend.display=false;
+    chart.options.layout.padding.right = isSingle?20:165;
+    chart.update();
+
+    if(!isSingle){ updateSummary(); }
+  }
+
+  // ================= dragging =================
+  var canvas=document.getElementById('chart'), dragIdx=-1, dragKey=null, dragMode=null;
+  var pendIdx=-1, pendMode=null, downPos=null, dragging=false, DRAG_THRESH=4;
+  function evtPos(e){ var r=canvas.getBoundingClientRect(); var t=(e.touches&&e.touches[0])?e.touches[0]:e; return { x:t.clientX-r.left, y:t.clientY-r.top }; }
+  function pickVignette(pos){ var best=-1, bd=16; curSegs.forEach(function(s,i){ var px=chart.scales.x.getPixelForValue(s.wqi), py=chart.scales.yCost.getPixelForValue(s.curveY); var d=Math.hypot(px-pos.x,py-pos.y); if(d<bd){bd=d;best=i;} }); return best; }
+  function pickSingle(pos){ var di=findIdx('Salvo points'); if(di<0) return -1; var ds=chart.data.datasets[di]; var best=-1,bd=15; ds.data.forEach(function(d,i){ var px=chart.scales.x.getPixelForValue(d.x), py=chart.scales.yCost.getPixelForValue(d.y); var dd=Math.hypot(px-pos.x,py-pos.y); if(dd<bd){bd=dd;best=i;} }); return best; }
+  function setMatrix(key,wqi){ if(curSalvo.type==='homog'){ workM[key.aiLC][key.stateIdx]=wqi; } else { var mm=(key.mun==='LUCAS')?workM.L:workM.J; mm[key.aiLC][key.stateIdx]=wqi; } }
+  function baselineWQI(seg){ if(curSalvo.type==='homog') return curSalvo.baseM[seg.aiLC][seg.stateIdx]; return (seg.mun==='LUCAS'?curSalvo.baseL:curSalvo.baseJ)[seg.aiLC][seg.stateIdx]; }
+  function isModifiedVignette(){ if(curSalvo.type==='homog') return JSON.stringify(workM)!==JSON.stringify(curSalvo.baseM); if(curSalvo.type==='dist') return JSON.stringify(workM.L)!==JSON.stringify(curSalvo.baseL)||JSON.stringify(workM.J)!==JSON.stringify(curSalvo.baseJ); for(var i=0;i<curSegs.length;i++){ if(Math.abs(curSegs[i].wqi-curSalvo.segs[i].wqi)>1e-9) return true; } return false; }
+  function refreshPathData(){
+    var li=findIdx('SalvoLine'); if(li>=0){ chart.data.datasets[li].data=renderSegs().map(function(s){ return {x:s.wqi,y:s.cost,seg:s}; }); }
+    var pi=findIdx('SalvoPoints'); if(pi>=0){ var pp=curSegs.map(function(s){ return {x:s.wqi,y:s.cost,seg:s}; });
+      chart.data.datasets[pi].data=pp;
+      chart.data.datasets[pi].pointStyle=pp.map(function(p){ return p.seg.state==='Saturated'?'rectRot':'circle'; });
+      chart.data.datasets[pi].pointRadius=pp.map(function(p){ return p.seg.capped?6:8; });
+      chart.data.datasets[pi].pointBackgroundColor=pp.map(function(p){ return p.seg.capped?'#f4a6b4':'#e4002b'; }); }
+    var gi=findIdx('BaseGhost'); if(gi>=0) chart.data.datasets[gi].hidden=!modified;
+  }
+  // reveal the path progressively (constant pixel-speed) with a moving frontier point
+  function animFrontier(prog){
+    var full=curSegs; if(full.length<=1) return full.slice();
+    var x=chart.scales.x, y=chart.scales.yCost;
+    var px=full.map(function(s){ return {x:x.getPixelForValue(s.wqi), y:y.getPixelForValue(s.cost)}; });
+    var seg=[], tot=0; for(var i=0;i<px.length-1;i++){ var d=Math.hypot(px[i+1].x-px[i].x, px[i+1].y-px[i].y); seg.push(d); tot+=d; }
+    if(tot<=0) return full.slice();
+    var target=prog*tot, acc=0, k=0, f=0, found=false;
+    for(k=0;k<seg.length;k++){ if(acc+seg[k]>=target){ f=(target-acc)/(seg[k]||1); found=true; break; } acc+=seg[k]; }
+    if(!found) return full.slice();
+    var out=full.slice(0,k+1);
+    if(f>0.0001 && k<full.length-1){ var fx=px[k].x+(px[k+1].x-px[k].x)*f, fy=px[k].y+(px[k+1].y-px[k].y)*f;
+      out.push({ synthetic:true, wqi:x.getValueForPixel(fx), cost:y.getValueForPixel(fy), state:full[k].state, mun:full[k].mun, ai:full[k].ai, count:0, curveY:0, capped:false, willSat:(full[k].state==='Defended' && full[k+1].state==='Saturated') }); }
+    return out;
+  }
+  function triggerAnim(){
+    if(animRAF) cancelAnimationFrame(animRAF);
+    if(filt.basis==='single' || curSegs.length<=1){ animSegs=null; animating=false; return; }
+    animating=true; animSegs=[curSegs[0]];
+    var dur=Math.min(2800, 1000+400*(curSegs.length-1));
+    requestAnimationFrame(function(){ var t0=performance.now();
+      (function step(now){ var prog=Math.min(1,(now-t0)/dur); animSegs=animFrontier(prog); refreshPathData(); chart.update('none');
+        if(prog<1){ animRAF=requestAnimationFrame(step); } else { animSegs=null; animating=false; refreshPathData(); chart.update('none'); } })(performance.now());
+    });
+  }
+  function applyDrag(pos){
+    var w=chart.scales.x.getValueForPixel(pos.x); w=Math.min(0.95,Math.max(0.004,w)); w=Math.round(w*10000)/10000;
+    if (dragMode==='single'){ var di=findIdx('Salvo points'); if(di<0) return; var d=chart.data.datasets[di].data[dragIdx]; if(!d) return; singleOverrides[d.id]=w; var q=qAP(w); d.x=w; d.y=Math.round(UNIT[d.m]*q*100)/100; d.req=q; d.moved=true; chart.update('none'); var rb=document.getElementById('resetExplore'); rb.style.display='inline-block'; rb.classList.add('hot'); return; }
+    if (curSalvo.type==='static'){ var s=curSegs[dragIdx]; if(!s) return; s.wqi=w; var q2=qAP(w); s.count=isFinite(q2)?q2*s.ap:s.count; s.cost=Math.round(s.count*UNIT[s.mun]*100)/100; s.curveY=s.cost; modified=true; }
+    else { setMatrix(dragKey, w); modified=true; curSegs=mapSegs(resolveCur()); }
+    refreshPathData(); chart.update('none'); updateSummary();
+  }
+  function snapBack(mode, idx){
+    if(mode==='single'){ var di=findIdx('Salvo points'); if(di<0) return; var d=chart.data.datasets[di].data[idx]; if(!d) return; delete singleOverrides[d.id]; chart.data.datasets[di]=pointDataset(); chart.update(); var any=Object.keys(singleOverrides).length>0; var rb=document.getElementById('resetExplore'); rb.style.display=any?'inline-block':'none'; rb.classList.toggle('hot',any); return; }
+    if(curSalvo.type==='static'){ var s=curSegs[idx]; if(!s) return; s.wqi=curSalvo.segs[idx].wqi; var q=qAP(s.wqi); s.count=isFinite(q)?q*s.ap:s.count; s.cost=Math.round(s.count*UNIT[s.mun]*100)/100; s.curveY=s.cost; modified=isModifiedVignette(); refreshPathData(); chart.update(); updateSummary(); return; }
+    var seg=curSegs[idx]; if(!seg) return; setMatrix({mun:seg.mun,aiLC:seg.aiLC,stateIdx:seg.stateIdx}, baselineWQI(seg)); curSegs=mapSegs(resolveCur()); modified=isModifiedVignette(); refreshPathData(); chart.update(); updateSummary();
+  }
+  function onDown(e){ if(animating) return; var pos=evtPos(e); dragging=false; downPos=pos; pendIdx=-1;
+    if(filt.basis==='single'){ var si=pickSingle(pos); if(si>=0){ pendMode='single'; pendIdx=si; canvas.style.cursor='grabbing'; e.preventDefault(); } return; }
+    var vi=pickVignette(pos); if(vi>=0){ pendMode='vignette'; pendIdx=vi; canvas.style.cursor='grabbing'; e.preventDefault(); }
+  }
+  function onMove(e){ if(animating){ canvas.style.cursor='default'; return; } var pos=evtPos(e);
+    if(pendIdx>=0){ if(!dragging && Math.hypot(pos.x-downPos.x,pos.y-downPos.y)>DRAG_THRESH){ dragging=true; dragMode=pendMode; dragIdx=pendIdx; if(pendMode==='vignette'){ var s=curSegs[pendIdx]; dragKey={mun:s.mun,aiLC:s.aiLC,stateIdx:s.stateIdx}; } } if(dragging){ applyDrag(pos); e.preventDefault(); } return; }
+    var over=(filt.basis==='single')?pickSingle(pos)>=0:pickVignette(pos)>=0; canvas.style.cursor=over?'grab':'default';
+  }
+  function onUp(){ if(pendIdx>=0 && !dragging){ snapBack(pendMode, pendIdx); } pendIdx=-1; pendMode=null; dragging=false; dragIdx=-1; dragMode=null; dragKey=null; }
+  canvas.addEventListener('mousedown',onDown); canvas.addEventListener('mousemove',onMove); window.addEventListener('mouseup',onUp);
+  canvas.addEventListener('touchstart',onDown,{passive:false}); canvas.addEventListener('touchmove',onMove,{passive:false}); window.addEventListener('touchend',onUp);
+
+  document.getElementById('resetExplore').addEventListener('click', function(){ if(filt.basis==='single'){ singleOverrides={}; refresh(); } else { buildCurSegs(curSalvo); refresh(); } });
+
+  function syncCaseImplied(){ if (filt.basis==='antiship'){ vigOn.anti=true; vigOn.air=false; } else if (filt.basis==='single'){ vigOn.anti=true; vigOn.air=true; } else { vigOn.anti=false; vigOn.air=true; } }
+  document.querySelectorAll('button[data-f]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var f=b.getAttribute('data-f'); filt[f]=b.getAttribute('data-v');
+      document.querySelectorAll('button[data-f="'+f+'"]').forEach(function(x){ x.classList.remove('active'); });
+      b.classList.add('active');
+      if (f==='basis'){ syncCaseImplied(); if(filt.basis!=='single'){ buildCurSegs(SALVOS[filt.basis][STATE.selected[filt.basis]]); renderStepList(); triggerAnim(); } }
+      refresh();
+    });
+  });
+  document.querySelectorAll('button.tog[data-tog="mun"]').forEach(function(b){
+    b.addEventListener('click', function(){ var v=b.getAttribute('data-v'); var on=!b.classList.contains('active'); b.classList.toggle('active', on); munOn[v]=on; b.style.color = on ? '#fff' : '#999'; refresh(); });
+  });
+
+  // Embed support: ?fig=2|3|4|6|7 selects one figure and hides the tab bar.
+  // Optional &header=0 hides the title and subtitle for a barer embed.
+  (function initFromURL(){
+    try {
+      var q = new URLSearchParams(window.location.search);
+      var fig = q.get('fig');
+      var map = { '2':'single', '3':'antiship', '4':'airbase', '6':'air57', '7':'air16' };
+      if (fig && map[fig]) {
+        filt.basis = map[fig];
+        var vg = document.querySelector('.vignettes'); if(vg) vg.style.display='none';
+        document.querySelectorAll('button[data-f="basis"]').forEach(function(x){ x.classList.remove('active'); });
+        var b = document.querySelector('button[data-v="'+map[fig]+'"]'); if(b) b.classList.add('active');
+        syncCaseImplied();
+        if (filt.basis!=='single'){ buildCurSegs(SALVOS[filt.basis][STATE.selected[filt.basis]]); renderStepList(); triggerAnim(); }
+      }
+      if (q.get('header')==='0'){ var h=document.querySelector('h1'); if(h) h.style.display='none'; var s=document.getElementById('subhead'); if(s) s.style.display='none'; }
+    } catch(e){}
+  })();
+
+  refresh();
+</script>
+</body>
+</html>
