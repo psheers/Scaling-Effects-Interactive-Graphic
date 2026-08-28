@@ -559,11 +559,15 @@
       var q = new URLSearchParams(window.location.search);
       var fig = q.get('fig');
       var map = { '2':'single', '3':'antiship', '4':'airbase', '6':'air57', '7':'air16' };
+      var figName = { 'single':'Single Aimpoint', 'antiship':'Anti-Ship Vignette', 'airbase':'Airbase Vignette (80 aimpoints)', 'air57':'Airbase Vignette (57 aimpoints)', 'air16':'Airbase Vignette (16 aimpoints)' };
       if (fig && map[fig]) {
         filt.basis = map[fig];
         var vg = document.querySelector('.vignettes'); if(vg) vg.style.display='none';
         document.querySelectorAll('button[data-f="basis"]').forEach(function(x){ x.classList.remove('active'); });
         var b = document.querySelector('button[data-v="'+map[fig]+'"]'); if(b) b.classList.add('active');
+        var ttl = 'Cost to achieve 0.95 DE vs. WQI: ' + figName[map[fig]];
+        var h1 = document.querySelector('h1'); if(h1) h1.textContent = ttl;
+        document.title = ttl;
         syncCaseImplied();
         if (filt.basis!=='single'){ buildCurSegs(SALVOS[filt.basis][STATE.selected[filt.basis]]); renderStepList(); triggerAnim(); }
       }
