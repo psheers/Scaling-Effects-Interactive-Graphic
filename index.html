@@ -67,14 +67,14 @@
       <span><span class="sw" style="background:#eb6834"></span>JASSM &mdash; $2.0M</span>
       <span><span class="sw" style="background:#1baf7a"></span>HERON &mdash; $0.2M</span>
       <span><span class="sw" style="background:#4a3aa7"></span>LUCAS &mdash; $0.1M</span>
-      <span><span class="sw dash"></span>Munitions per Aimpoint (Right Axis)</span>
+      <span><span class="sw dash"></span>Munitions per aimpoint (right axis)</span>
     </div>
     <div class="legend">
       <span style="color:#666;">Marker:</span>
-      <span><span class="dot solid"></span>Homogeneous, Defended</span>
-      <span><span class="dot hollow"></span>Homogeneous, Saturated</span>
-      <span><span class="dot hatch"></span>Multi-Wave, Defended</span>
-      <span><span class="dot hatchlight"></span>Multi-Wave, Saturated</span>
+      <span><span class="dot solid"></span>Homogenous, defended</span>
+      <span><span class="dot hollow"></span>Homogenous, saturated</span>
+      <span><span class="dot hatch"></span>Multiwave, defended</span>
+      <span><span class="dot hatchlight"></span>Multiwave, saturated</span>
     </div>
     <div class="legend shapes">
       <span>Shape = Aimpoint:</span><span>&#9679; Ship</span><span>&#9650; Soft</span><span>&#9632; Hard</span><span>&#9670; Buried</span>
@@ -89,8 +89,8 @@
       <div class="divider"></div>
       <div class="grp"><label>Salvo Type</label>
         <button data-f="panel" data-v="all" class="active">All</button>
-        <button data-f="panel" data-v="homog">Homogeneous</button>
-        <button data-f="panel" data-v="mixed">Multi-Wave</button>
+        <button data-f="panel" data-v="homog">Homogenous</button>
+        <button data-f="panel" data-v="mixed">Multiwave</button>
       </div>
       <div class="grp"><label>State</label>
         <button data-f="state" data-v="all" class="active">All</button>
@@ -111,19 +111,18 @@
     <div class="legend">
       <span><span class="rdot"></span>Defended segment</span>
       <span><span class="rdia"></span>Saturated segment</span>
-      <span><span class="rring"></span>WQI handle &mdash; drag along curve</span>
-      <span style="margin-left:6px; color:#888;">Bold lines = per-hardness cost curves</span>
+      <span><span class="rring"></span>WQI handle&mdash;drag along curve</span>
     </div>
   </div>
 
   <div class="layout">
     <div class="stepper" id="stepper" style="display:none;">
-      <div class="hd">Salvo &mdash; authors' assumptions (table values)</div>
+      <div class="hd">Salvo results &mdash; authors' assumptions (table values)</div>
       <div id="stepList"></div>
     </div>
     <div class="chartcol">
       <div class="chart-head">
-        <span class="hint" id="dragHint" style="display:none;">Drag any red handle to change its WQI &mdash; the whole salvo re-solves live (saturation, remainders, and totals update).</span>
+        <span class="hint" id="dragHint" style="display:none;">Drag any red handle to change WQI. The whole salvo resolves live.</span>
         <button id="resetExplore" style="display:none;">Reset to authors' assumptions</button>
       </div>
       <div class="chartbox"><canvas id="chart"></canvas></div>
@@ -186,7 +185,8 @@
   function qReq(w){ return qAP(w); }
   function lineData(unit, factor){ var a=[]; for(var w=0.004; w<=0.9509; w+=0.002){ a.push({x:Math.round(w*10000)/10000, y:Math.round(unit*factor*qAP(w)*100)/100}); } return a; }
   function munData(factor){ var a=[]; for(var w=0.004; w<=0.9509; w+=0.002){ a.push({x:Math.round(w*10000)/10000, y:qAP(w)*factor}); } return a; }
-  function fmtM(y){ return '$' + (y>=100 ? Math.round(y).toLocaleString() : y.toFixed(2)) + 'M'; }
+  function fmtM(y){ return '$' + y.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}) + 'M'; }
+  function fmtAxis(v){ return '$' + (v<1 ? String(v) : v.toLocaleString('en-US')) + 'M'; }
 
   var COLOR = { LRASM:'#2a78d6', JASSM:'#eb6834', HERON:'#1baf7a', LUCAS:'#4a3aa7' };
   var SHAPE = { Ship:'circle', Soft:'triangle', Hard:'rect', Buried:'rectRot' };
@@ -194,11 +194,11 @@
   function vigOf(m){ return (m==='LRASM'||m==='HERON') ? 'anti' : 'air'; }
   var SETS = { single:{Ship:1,Soft:1,Hard:1,Buried:1}, antiship:{Ship:1}, airbase:{Soft:59,Hard:18,Buried:3}, air57:{Soft:38,Hard:16,Buried:3}, air16:{Soft:14,Hard:2,Buried:0} };
   var AXIS = {
-    single:   { min:0.1, max:500,  r:200,  title:'Salvo Cost to Achieve 0.95 DE ($M)' },
-    antiship: { min:0.1, max:500,  r:200,  title:'Salvo Cost, 1 Renhai-class Cruiser ($M)' },
-    airbase:  { min:1,   max:3000, r:1000, title:'Huian Airbase Vignette Cost, 80 Aimpoints ($M)' },
-    air57:    { min:1,   max:2000, r:1000, title:'Huian Airbase Vignette Cost, 57 Aimpoints ($M)' },
-    air16:    { min:1,   max:1000, r:1000, title:'Huian Airbase Vignette Cost, 16 Aimpoints ($M)' }
+    single:   { min:0.1, max:500,  r:200,  title:'Salvo cost to achieve 0.95 DE ($M)' },
+    antiship: { min:0.1, max:500,  r:200,  title:'Salvo cost, 1 Renhai-class cruiser ($M)' },
+    airbase:  { min:1,   max:3000, r:1000, title:'Huian airbase vignette cost, 80 aimpoints ($M)' },
+    air57:    { min:1,   max:2000, r:1000, title:'Huian airbase vignette cost, 57 aimpoints ($M)' },
+    air16:    { min:1,   max:1000, r:1000, title:'Huian airbase vignette cost, 16 aimpoints ($M)' }
   };
   var SUBHEAD = {
     single: "This interactive chart depicts how different WQI levels affect munitions expenditure and cost per salvo for a single aimpoint. The colored lines show each munition's cost curve; the shaped markers show the authors' WQI assumptions by aimpoint type and defense state.",
@@ -234,18 +234,18 @@
   // ================= salvo definitions =================
   var SALVOS = {
     antiship: [
-      { name:'Homog. LRASM', type:'static', muns:['LRASM'], scout:null, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:6,wqi:0.4356}] },
-      { name:'Homog. HERON', type:'static', muns:['HERON'], scout:null, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:140,wqi:0.02125}] },
+      { name:'Homogenous LRASM', type:'static', muns:['LRASM'], scout:null, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:6,wqi:0.4356}] },
+      { name:'Homogenous HERON', type:'static', muns:['HERON'], scout:null, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:140,wqi:0.02125}] },
       { name:'Scout HERON + LRASM', type:'static', muns:['LRASM'], scout:{mun:'HERON',count:25}, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:3,wqi:0.65835}] },
       { name:'Scout HERON + HERON', type:'static', muns:['HERON'], scout:{mun:'HERON',count:25}, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:22,wqi:0.1275}] }
     ],
     airbase: [
-      { name:'Homog. JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.hJ, scout:null, K:350, note:'' },
-      { name:'Homog. LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.hL, scout:null, K:350, note:'Buried targets unserviced' },
-      { name:'Scout/Decoy + JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.mJ, scout:{mun:'LUCAS',count:25}, K:350, note:'' },
-      { name:'Scout/Decoy + LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.mL, scout:{mun:'LUCAS',count:25}, K:350, note:'Buried targets unserviced' },
-      { name:'Distribute by Hardness', type:'dist', muns:['LUCAS','JASSM'], baseL:MBASE.hL, baseJ:MBASE.hJ, scout:null, K:350, note:'' },
-      { name:'Scout/Decoy + Distribute', type:'dist', muns:['LUCAS','JASSM'], baseL:MBASE.mL, baseJ:MBASE.mJ, scout:{mun:'LUCAS',count:25}, K:350, note:'' }
+      { name:'Homogenous JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.hJ, scout:null, K:350, note:'' },
+      { name:'Homogenous LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.hL, scout:null, K:350, note:'Buried targets unserviced' },
+      { name:'Scout/decoy + JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.mJ, scout:{mun:'LUCAS',count:25}, K:350, note:'' },
+      { name:'Scout/decoy + LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.mL, scout:{mun:'LUCAS',count:25}, K:350, note:'Buried targets unserviced' },
+      { name:'Distribute by hardness', type:'dist', muns:['LUCAS','JASSM'], baseL:MBASE.hL, baseJ:MBASE.hJ, scout:null, K:350, note:'' },
+      { name:'Scout/decoy + distribute', type:'dist', muns:['LUCAS','JASSM'], baseL:MBASE.mL, baseJ:MBASE.mJ, scout:{mun:'LUCAS',count:25}, K:350, note:'' }
     ]
   };
   SALVOS.air57 = SALVOS.airbase;
@@ -286,8 +286,8 @@
   function stepperBoldLines(salvo){
     var out=[];
     salvo.muns.forEach(function(m){
-      if (filt.basis==='antiship'){ var d=lineDS(m+' Ship \u2014 1 aimpoint',toRgba(COLOR[m],0.85),UNIT[m],1); d.borderWidth=2.6; d.endLabel=m+' Ship \u2014 1 aimpoint'; out.push(d); }
-      else { ['Soft','Hard','Buried'].forEach(function(ai){ if(!HAS[m][ai]) return; var c=SETS[filt.basis][ai]; if(!c) return; var d=lineDS(m+' '+ai+' \u2014 '+c+' aimpoint'+(c>1?'s':''), toRgba(shadeFor(m,ai),0.8), UNIT[m], c); d.borderWidth=2.4; d.endLabel=m+' '+ai+' \u2014 '+c+' aimpoint'+(c>1?'s':''); out.push(d); }); }
+      if (filt.basis==='antiship'){ var d=lineDS(m+' ship \u2014 1 aimpoint',toRgba(COLOR[m],0.85),UNIT[m],1); d.borderWidth=2.6; d.endLabel=m+' ship \u2014 1 aimpoint'; out.push(d); }
+      else { ['Soft','Hard','Buried'].forEach(function(ai){ if(!HAS[m][ai]) return; var c=SETS[filt.basis][ai]; if(!c) return; var d=lineDS(m+' '+ai.toLowerCase()+' \u2014 '+c+' aimpoint'+(c>1?'s':''), toRgba(shadeFor(m,ai),0.8), UNIT[m], c); d.borderWidth=2.4; d.endLabel=m+' '+ai.toLowerCase()+' \u2014 '+c+' aimpoint'+(c>1?'s':''); out.push(d); }); }
     });
     return out;
   }
@@ -351,17 +351,18 @@
     curSegs.forEach(function(s){ if(!s.capped) return; var hx=x.getPixelForValue(s.wqi), hy=y.getPixelForValue(s.curveY), ry=y.getPixelForValue(s.cost);
       ctx.save(); ctx.strokeStyle='rgba(228,0,43,0.55)'; ctx.setLineDash([3,3]); ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx,ry); ctx.stroke(); ctx.setLineDash([]);
       ctx.beginPath(); ctx.arc(hx,hy,6,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill(); ctx.lineWidth=2.2; ctx.strokeStyle='#e4002b'; ctx.stroke();
-      if(s===firstCapped){ ctx.font='italic 9px Arial'; ctx.fillStyle='rgba(122,0,22,0.75)'; ctx.textAlign='left'; ctx.fillText('drag WQI', hx+9, hy-1); }
+      if(s===firstCapped){ ctx.font='italic 9px Arial'; ctx.fillStyle='rgba(122,0,22,0.75)'; ctx.textAlign='left'; ctx.fillText('Drag WQI', hx+9, hy-1); }
       ctx.restore(); });
   } };
   // segment count labels + scout sub-label
   var segLabels = { id:'segLabels', afterDatasetsDraw:function(ch){
     if(filt.basis==='single') return; var di=findIdx('SalvoPoints'); if(di<0) return; var ctx=ch.ctx, ds=ch.data.datasets[di], meta=ch.getDatasetMeta(di), area=ch.chartArea;
-    ctx.save(); ctx.font='700 10.5px Arial'; ctx.textBaseline='middle';
+    ctx.save(); ctx.font='700 10px Arial'; ctx.textBaseline='middle';
     var L=[];
-    meta.data.forEach(function(pt,i){ var s=ds.data[i].seg; if(s.synthetic) return; var txt=s.count.toLocaleString()+' '+s.mun+' '+s.ai+' ('+(s.state==='Saturated'?'sat':'def')+')'; var w=ctx.measureText(txt).width; var cx=Math.min(Math.max(pt.x, area.left+w/2+4), area.right-w/2-4); L.push({txt:txt, w:w, cx:cx, cy:pt.y-13, py:pt.y}); });
-    var placed=[];
-    L.slice().sort(function(a,b){ return a.cx-b.cx; }).forEach(function(lab){ var g=0; while(g++<12){ var hit=false; for(var k=0;k<placed.length;k++){ var p=placed[k]; if(Math.abs(lab.cx-p.cx) < (lab.w+p.w)/2+6 && Math.abs(lab.cy-p.cy) < 14){ lab.cy=p.cy-14; hit=true; } } if(!hit) break; } if(lab.cy < area.top+8) lab.cy=lab.py+16; placed.push(lab); });
+    meta.data.forEach(function(pt,i){ var s=ds.data[i].seg; if(s.synthetic) return; var txt=s.count.toLocaleString()+' '+s.mun+' '+s.ai.toLowerCase()+' ('+(s.state==='Saturated'?'saturated':'defended')+')'; var w=ctx.measureText(txt).width; var cx=Math.min(Math.max(pt.x, area.left+w/2+4), area.right-w/2-4); L.push({txt:txt, w:w, cx:cx, cy:pt.y-13, py:pt.y}); });
+    L.sort(function(a,b){ return a.cy-b.cy; });
+    for(var i=0;i<L.length;i++){ var guard=0; while(guard++<40){ var moved=false; for(var k=0;k<i;k++){ var p=L[k]; if(Math.abs(L[i].cx-p.cx) < (L[i].w+p.w)/2+4 && Math.abs(L[i].cy-p.cy) < 13){ L[i].cy=p.cy+13; moved=true; } } if(!moved) break; } }
+    L.forEach(function(l){ if(l.cy>area.bottom-4) l.cy=area.bottom-4; if(l.cy<area.top+8) l.cy=area.top+8; });
     ctx.textAlign='center'; ctx.fillStyle='#a3001a';
     L.forEach(function(lab){ ctx.fillText(lab.txt, lab.cx, lab.cy); });
     if(curScout && meta.data[0]){ var p0=meta.data[0]; ctx.font='italic 10px Arial'; ctx.fillStyle='#8a8a8a'; var pl=curScout.mun+(/S$/.test(curScout.mun)?'':'s'); var stxt='(+'+curScout.count+' Scout '+pl+')'; var sw=ctx.measureText(stxt).width; var scx=Math.min(Math.max(p0.x, area.left+sw/2+4), area.right-sw/2-4); ctx.textAlign='center'; ctx.fillText(stxt, scx, p0.y+16); }
@@ -375,7 +376,7 @@
       var mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2, ang=Math.atan2(p2.y-p1.y,p2.x-p1.x), frontier=s2.synthetic;
       if(!frontier) arrowHead(ctx,mx,my,ang);
       var callout = (s1.state==='Defended') && ((!frontier && s2.state==='Saturated') || (frontier && s2.willSat));
-      if (callout){ ctx.save(); ctx.font='italic 700 10px Arial'; ctx.fillStyle='#a3001a'; ctx.textAlign='center'; var nx=-(p2.y-p1.y), ny=(p2.x-p1.x), nl=Math.hypot(nx,ny)||1; nx/=nl; ny/=nl; ctx.fillText('air defenses saturated', mx+nx*14, my+ny*14+3); ctx.restore(); }
+      if (callout){ ctx.save(); ctx.font='italic 700 10px Arial'; ctx.fillStyle='#a3001a'; ctx.textAlign='center'; var nx=-(p2.y-p1.y), ny=(p2.x-p1.x), nl=Math.hypot(nx,ny)||1; nx/=nl; ny/=nl; ctx.fillText('Air defenses saturated', mx+nx*14, my+ny*14+3); ctx.restore(); }
     }
   } };
 
@@ -410,16 +411,16 @@
         tooltip:{ callbacks:{ label:function(c){
           var r=c.raw;
           if (r && r.seg){ var s=r.seg; return s.count.toLocaleString()+' '+s.mun+' \u00B7 '+s.ai+' \u00B7 '+s.state+' \u00B7 WQI '+(Math.round(s.wqi*1000)/1000)+' \u00B7 '+fmtM(r.y); }
-          if (r && r.m){ var salvo=r.panel==='mixed'?'Multi-Wave':'Homogeneous'; return r.m+', '+r.ai+', '+salvo+', '+r.state+'  |  WQI '+r.x+'  \u00B7  '+r.req+' munitions  \u00B7  '+fmtM(r.y); }
+          if (r && r.m){ var salvo=r.panel==='mixed'?'Multiwave':'Homogenous'; return r.m+', '+r.ai+', '+salvo+', '+r.state+'  |  WQI '+r.x+'  \u00B7  '+r.req+' munitions  \u00B7  '+fmtM(r.y); }
           if (c.dataset.label==='Munitions per aimpoint (right axis)') return 'Munitions per aimpoint: '+c.parsed.y;
           if (c.dataset.label==='BaseGhost') return 'Authors\u2019 baseline';
           return c.dataset.label+'  \u00B7  '+fmtM(c.parsed.y)+' at WQI '+c.parsed.x;
         } } }
       },
       scales:{
-        x:{ type:'linear', min:0, max:0.95, title:{display:true,text:'Weapon Quality Index (WQI)',color:'#666'}, ticks:{color:'#666',stepSize:0.1}, grid:{color:'#eee'} },
-        yCost:{ type:'logarithmic', position:'left', min:0.1, max:500, title:{display:true,text:'Salvo Cost to Achieve 0.95 DE ($M)',color:'#666'}, afterBuildTicks: tickFilter(LEFT_TICKS), ticks:{color:'#666',callback:function(v){ return fmtM(v); }}, grid:{color:'#eee'} },
-        yMun:{ type:'logarithmic', position:'right', min:1, max:200, title:{display:true,text:'Munitions per Aimpoint (Grey Dotted Line Only)',color:'#8a8a8a', font:{style:'italic'}}, afterBuildTicks: tickFilter(RIGHT_TICKS), ticks:{color:'#8a8a8a',callback:function(v){ return v.toLocaleString(); }}, border:{ display:true, color:'#8a8a8a', dash:[2,3], width:1.5 }, grid:{drawOnChartArea:false} }
+        x:{ type:'linear', min:0, max:0.95, title:{display:true,text:'Weapon quality index (WQI)',color:'#666'}, ticks:{color:'#666',stepSize:0.1}, grid:{color:'#eee'} },
+        yCost:{ type:'logarithmic', position:'left', min:0.1, max:500, title:{display:true,text:'Salvo cost to achieve 0.95 DE ($M)',color:'#666'}, afterBuildTicks: tickFilter(LEFT_TICKS), ticks:{color:'#666',callback:function(v){ return fmtAxis(v); }}, grid:{color:'#eee'} },
+        yMun:{ type:'logarithmic', position:'right', min:1, max:200, title:{display:true,text:'Munitions per aimpoint (gray dotted line only)',color:'#8a8a8a', font:{style:'italic'}}, afterBuildTicks: tickFilter(RIGHT_TICKS), ticks:{color:'#8a8a8a',callback:function(v){ return v.toLocaleString(); }}, border:{ display:true, color:'#8a8a8a', dash:[2,3], width:1.5 }, grid:{drawOnChartArea:false} }
       }
     },
     plugins:[handlePlugin, segLabels, arrowPlugin, lineEndLabels, singleGhost, singleLabels]
@@ -433,7 +434,7 @@
     var host=document.getElementById('stepList'); host.innerHTML='';
     (SALVOS[filt.basis]||[]).forEach(function(s,i){ var t=salvoTotalsBase(s);
       var b=document.createElement('button'); b.className='step'+(i===STATE.selected[filt.basis]?' active':'');
-      b.innerHTML='<span class="nm">'+(i+1)+'. '+s.name+'</span><br><span class="ct">'+t.muns.toLocaleString()+' muns \u00B7 '+fmtM(t.cost)+'</span>';
+      b.innerHTML='<span class="nm">'+(i+1)+'. '+s.name+'</span><br><span class="ct">'+t.muns.toLocaleString()+' munitions \u00B7 '+fmtM(t.cost)+'</span>';
       b.addEventListener('click', function(){ STATE.selected[filt.basis]=i; buildCurSegs(SALVOS[filt.basis][i]); renderStepList(); triggerAnim(); refresh(); });
       host.appendChild(b);
     });
@@ -454,7 +455,7 @@
     document.getElementById('summary').style.display = isSingle?'none':'block';
     document.getElementById('stepnote').style.display = 'none';
     document.getElementById('dragHint').style.display = 'inline';
-    document.getElementById('dragHint').textContent = isSingle ? 'Drag any point along its curve to explore a different WQI \u2014 count and cost update live.' : 'Drag any red handle to change its WQI \u2014 the whole salvo re-solves live (saturation, remainders, and totals update).';
+    document.getElementById('dragHint').textContent = isSingle ? 'Drag any point along its curve to explore a different WQI; count and cost update live.' : 'Drag any red handle to change WQI. The whole salvo resolves live.';
     document.getElementById('resetExplore').style.display = isSingle ? (Object.keys(singleOverrides).length>0?'inline-block':'none') : 'inline-block';
     document.getElementById('resetExplore').classList.toggle('hot', isSingle ? Object.keys(singleOverrides).length>0 : modified);
 
