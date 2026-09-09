@@ -560,7 +560,7 @@
       var q = new URLSearchParams(window.location.search);
       var fig = q.get('fig');
       var map = { '2':'single', '3':'antiship', '4':'airbase', '6':'air57', '7':'air16' };
-      var figName = { 'single':'Single Aimpoint', 'antiship':'Anti-Ship Vignette', 'airbase':'Airbase Vignette (80 Aimpoints)', 'air57':'Airbase Vignette (57 Aimpoints)', 'air16':'Airbase Vignette (16 Aimpoints)' };
+      var figName = { 'single':'Single Aimpoint', 'antiship':'Anti-Ship Vignette', 'airbase':'Air Base Vignette (80 Aimpoints)', 'air57':'Air Base Vignette (57 Aimpoints)', 'air16':'Air Base Vignette (16 Aimpoints)' };
       if (fig && map[fig]) {
         filt.basis = map[fig];
         var vg = document.querySelector('.vignettes'); if(vg) vg.style.display='none';
