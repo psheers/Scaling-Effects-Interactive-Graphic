@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cost to achieve 0.95 DE vs. Salvo WQI</title>
+<title>Cost to Achieve 0.95 Damage Expectancy (DE) vs. WQI</title>
 <style>
   body { font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; margin:0; padding:24px; background:#fff; }
   .wrap { max-width:1115px; margin:0 auto; }
@@ -48,7 +48,7 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Cost to achieve 0.95 DE vs. WQI</h1>
+  <h1>Cost to Achieve 0.95 Damage Expectancy (DE) vs. WQI</h1>
   <p class="subhead" id="subhead">This interactive chart depicts how different WQI levels affect munitions expenditure and cost per salvo for different strikes. The charts plot the authors' WQI assumptions and invites the reader to explore different WQI levels.</p>
 
   <div class="controls">
@@ -71,8 +71,8 @@
     </div>
     <div class="legend">
       <span style="color:#666;">Marker:</span>
-      <span><span class="dot solid"></span>Homogenous, defended</span>
-      <span><span class="dot hollow"></span>Homogenous, saturated</span>
+      <span><span class="dot solid"></span>Homogeneous, defended</span>
+      <span><span class="dot hollow"></span>Homogeneous, saturated</span>
       <span><span class="dot hatch"></span>Multiwave, defended</span>
       <span><span class="dot hatchlight"></span>Multiwave, saturated</span>
     </div>
@@ -89,7 +89,7 @@
       <div class="divider"></div>
       <div class="grp"><label>Salvo Type</label>
         <button data-f="panel" data-v="all" class="active">All</button>
-        <button data-f="panel" data-v="homog">Homogenous</button>
+        <button data-f="panel" data-v="homog">Homogeneous</button>
         <button data-f="panel" data-v="mixed">Multiwave</button>
       </div>
       <div class="grp"><label>State</label>
@@ -234,14 +234,14 @@
   // ================= salvo definitions =================
   var SALVOS = {
     antiship: [
-      { name:'Homogenous LRASM', type:'static', muns:['LRASM'], scout:null, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:6,wqi:0.4356}] },
-      { name:'Homogenous HERON', type:'static', muns:['HERON'], scout:null, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:140,wqi:0.02125}] },
+      { name:'Homogeneous LRASM', type:'static', muns:['LRASM'], scout:null, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:6,wqi:0.4356}] },
+      { name:'Homogeneous HERON', type:'static', muns:['HERON'], scout:null, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:140,wqi:0.02125}] },
       { name:'Scout HERON + LRASM', type:'static', muns:['LRASM'], scout:{mun:'HERON',count:25}, note:'', segs:[{mun:'LRASM',ai:'Ship',state:'Defended',count:3,wqi:0.65835}] },
       { name:'Scout HERON + HERON', type:'static', muns:['HERON'], scout:{mun:'HERON',count:25}, note:'', segs:[{mun:'HERON',ai:'Ship',state:'Defended',count:22,wqi:0.1275}] }
     ],
     airbase: [
-      { name:'Homogenous JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.hJ, scout:null, K:350, note:'' },
-      { name:'Homogenous LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.hL, scout:null, K:350, note:'Buried targets unserviced' },
+      { name:'Homogeneous JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.hJ, scout:null, K:350, note:'' },
+      { name:'Homogeneous LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.hL, scout:null, K:350, note:'Buried targets unserviced' },
       { name:'Scout/decoy + JASSM-ER', type:'homog', mun:'JASSM', muns:['JASSM'], baseM:MBASE.mJ, scout:{mun:'LUCAS',count:25}, K:350, note:'' },
       { name:'Scout/decoy + LUCAS-ER', type:'homog', mun:'LUCAS', muns:['LUCAS'], baseM:MBASE.mL, scout:{mun:'LUCAS',count:25}, K:350, note:'Buried targets unserviced' },
       { name:'Distribute by hardness', type:'dist', muns:['LUCAS','JASSM'], baseL:MBASE.hL, baseJ:MBASE.hJ, scout:null, K:350, note:'' },
@@ -411,7 +411,7 @@
         tooltip:{ callbacks:{ label:function(c){
           var r=c.raw;
           if (r && r.seg){ var s=r.seg; return s.count.toLocaleString()+' '+s.mun+' \u00B7 '+s.ai+' \u00B7 '+s.state+' \u00B7 WQI '+(Math.round(s.wqi*1000)/1000)+' \u00B7 '+fmtM(r.y); }
-          if (r && r.m){ var salvo=r.panel==='mixed'?'Multiwave':'Homogenous'; return r.m+', '+r.ai+', '+salvo+', '+r.state+'  |  WQI '+r.x+'  \u00B7  '+r.req+' munitions  \u00B7  '+fmtM(r.y); }
+          if (r && r.m){ var salvo=r.panel==='mixed'?'Multiwave':'Homogeneous'; return r.m+', '+r.ai+', '+salvo+', '+r.state+'  |  WQI '+r.x+'  \u00B7  '+r.req+' munitions  \u00B7  '+fmtM(r.y); }
           if (c.dataset.label==='Munitions per aimpoint (right axis)') return 'Munitions per aimpoint: '+c.parsed.y;
           if (c.dataset.label==='BaseGhost') return 'Authors\u2019 baseline';
           return c.dataset.label+'  \u00B7  '+fmtM(c.parsed.y)+' at WQI '+c.parsed.x;
@@ -560,13 +560,13 @@
       var q = new URLSearchParams(window.location.search);
       var fig = q.get('fig');
       var map = { '2':'single', '3':'antiship', '4':'airbase', '6':'air57', '7':'air16' };
-      var figName = { 'single':'Single Aimpoint', 'antiship':'Anti-Ship Vignette', 'airbase':'Airbase Vignette (80 aimpoints)', 'air57':'Airbase Vignette (57 aimpoints)', 'air16':'Airbase Vignette (16 aimpoints)' };
+      var figName = { 'single':'Single Aimpoint', 'antiship':'Anti-Ship Vignette', 'airbase':'Airbase Vignette (80 Aimpoints)', 'air57':'Airbase Vignette (57 Aimpoints)', 'air16':'Airbase Vignette (16 Aimpoints)' };
       if (fig && map[fig]) {
         filt.basis = map[fig];
         var vg = document.querySelector('.vignettes'); if(vg) vg.style.display='none';
         document.querySelectorAll('button[data-f="basis"]').forEach(function(x){ x.classList.remove('active'); });
         var b = document.querySelector('button[data-v="'+map[fig]+'"]'); if(b) b.classList.add('active');
-        var ttl = 'Cost to achieve 0.95 DE vs. WQI: ' + figName[map[fig]];
+        var ttl = 'Figure ' + fig + ': Cost to Achieve 0.95 Damage Expectancy (DE) vs. WQI: ' + figName[map[fig]];
         var h1 = document.querySelector('h1'); if(h1) h1.textContent = ttl;
         document.title = ttl;
         syncCaseImplied();
