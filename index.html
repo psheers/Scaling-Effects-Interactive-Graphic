@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cost to Achieve 0.95 Damage Expectancy (DE) vs. WQI</title>
 <style>
-  body { font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; margin:0; padding:24px; background:#fff; }
+  body { font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; margin:0; padding:16px; background:#fff; }
   .wrap { max-width:1115px; margin:0 auto; }
   h1 { font-size:21px; font-weight:700; margin:0 0 6px; }
   p.subhead { font-size:12.5px; color:#555; margin:0 0 16px; line-height:1.6; max-width:920px; }
@@ -29,8 +29,8 @@
   button.tog[data-tog="mun"].active { color:#fff; }
   #resetExplore { border-color:#c9a; } #resetExplore.hot { border-color:#e4002b; background:#fdeff1; color:#7a0016; font-weight:600; }
   .vignettes { background:#f7f7f4; border:1px solid #e3e3dc; border-radius:8px; padding:8px 12px; }
-  .layout { display:flex; gap:16px; align-items:flex-start; }
-  .stepper { width:250px; flex:0 0 250px; border:1px solid #e3e3dc; border-radius:8px; padding:8px; background:#fbfbf9; }
+  .layout { display:flex; gap:10px; align-items:flex-start; }
+  .stepper { width:200px; flex:0 0 200px; border:1px solid #e3e3dc; border-radius:8px; padding:8px; background:#fbfbf9; }
   .stepper .hd { font-size:11px; text-transform:uppercase; letter-spacing:0.03em; color:#888; margin:2px 4px 8px; line-height:1.3; }
   .step { display:block; width:100%; text-align:left; margin:0 0 6px; padding:7px 9px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:12px; color:#333; line-height:1.3; }
   .step .nm { font-weight:600; color:#222; } .step .ct { color:#7a0016; font-weight:600; }
@@ -38,7 +38,7 @@
   .chartcol { flex:1; min-width:0; }
   .chart-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; min-height:26px; gap:10px; }
   .hint { font-size:11.5px; color:#999; font-style:italic; }
-  .chartbox { position:relative; width:100%; height:470px; }
+  .chartbox { position:relative; width:100%; height:480px; }
   .shapes { font-size:12px; color:#666; }
   .divider { width:1px; height:22px; background:#ddd; }
   .summary { font-size:12.5px; color:#333; background:#fdf7f8; border:1px solid #f0d9de; border-radius:8px; padding:9px 12px; margin-top:10px; line-height:1.5; }
@@ -386,11 +386,11 @@
     ch.data.datasets.forEach(function(ds){ if(!ds.endLabel) return; var last=ds.data[ds.data.length-1]; if(!last) return; items.push({ y:y.getPixelForValue(last.y), color:ds.borderColor, text:ds.endLabel }); });
     if(!items.length) return;
     items.sort(function(a,b){ return a.y-b.y; });
-    var gap=13, bot=area.bottom-2;
+    var gap=15, bot=area.bottom-2;
     for(var i=1;i<items.length;i++){ if(items[i].y < items[i-1].y+gap) items[i].y=items[i-1].y+gap; }
     for(var j=items.length-1;j>0;j--){ if(items[j].y>bot){ items[j].y=bot; if(items[j-1].y>items[j].y-gap) items[j-1].y=items[j].y-gap; } }
-    ctx.save(); ctx.font='600 10.5px Arial'; ctx.textBaseline='middle'; ctx.textAlign='left';
-    items.forEach(function(it){ ctx.fillStyle=solidColor(it.color); ctx.fillText(it.text, area.right+6, it.y); });
+    ctx.save(); ctx.font='600 10.5px Arial'; ctx.textBaseline='middle'; ctx.textAlign='right'; var rx=area.right-6;
+    items.forEach(function(it){ var w=ctx.measureText(it.text).width; ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fillRect(rx-w-3, it.y-8, w+7, 16); ctx.fillStyle=solidColor(it.color); ctx.fillText(it.text, rx, it.y); });
     ctx.restore();
   } };
   var singleGhost = { id:'singleGhost', afterDatasetsDraw:function(ch){ if(filt.basis!=='single') return; var di=findIdx('Salvo points'); if(di<0) return; var ctx=ch.ctx,x=ch.scales.x,y=ch.scales.yCost, ds=ch.data.datasets[di];
@@ -464,7 +464,7 @@
     chart.options.scales.yCost.min=ax.min; chart.options.scales.yCost.max=ax.max; chart.options.scales.yCost.title.text=ax.title;
     chart.options.scales.yMun.display=isSingle; chart.options.scales.yMun.max=ax.r;
     chart.options.plugins.legend.display=false;
-    chart.options.layout.padding.right = isSingle?20:165;
+    chart.options.layout.padding.right = 20;
     chart.update();
 
     if(!isSingle){ updateSummary(); }
