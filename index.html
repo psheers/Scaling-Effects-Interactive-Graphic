@@ -561,12 +561,13 @@
       var fig = q.get('fig');
       var map = { '2':'single', '3':'antiship', '4':'airbase', '6':'air57', '7':'air16' };
       var figName = { 'single':'Single Aimpoint', 'antiship':'Anti-Ship Vignette', 'airbase':'Air Base Vignette (80 Aimpoints)', 'air57':'Air Base Vignette (57 Aimpoints)', 'air16':'Air Base Vignette (16 Aimpoints)' };
+      var figNum = { '2':'2', '3':'3', '4':'5', '6':'6', '7':'7' };  // displayed figure number in the header (can differ from the ?fig= URL param)
       if (fig && map[fig]) {
         filt.basis = map[fig];
         var vg = document.querySelector('.vignettes'); if(vg) vg.style.display='none';
         document.querySelectorAll('button[data-f="basis"]').forEach(function(x){ x.classList.remove('active'); });
         var b = document.querySelector('button[data-v="'+map[fig]+'"]'); if(b) b.classList.add('active');
-        var ttl = 'Figure ' + fig + ': Cost to Achieve 0.95 Damage Expectancy (DE) vs. WQI: ' + figName[map[fig]];
+        var ttl = 'Figure ' + (figNum[fig] || fig) + ': Cost to Achieve 0.95 Damage Expectancy (DE) vs. WQI: ' + figName[map[fig]];
         var h1 = document.querySelector('h1'); if(h1) h1.textContent = ttl;
         document.title = ttl;
         syncCaseImplied();
