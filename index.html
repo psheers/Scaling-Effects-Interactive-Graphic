@@ -383,14 +383,18 @@
   function solidColor(c){ if(c.indexOf('rgba(')===0){ return c.replace('rgba(','rgb(').replace(/,\s*[\d.]+\)\s*$/,')'); } return c; }
   var lineEndLabels = { id:'lineEnds', afterDatasetsDraw:function(ch){
     if(filt.basis==='single') return; var ctx=ch.ctx, area=ch.chartArea, y=ch.scales.yCost, items=[];
-    ch.data.datasets.forEach(function(ds){ if(!ds.endLabel) return; var last=ds.data[ds.data.length-1]; if(!last) return; items.push({ y:y.getPixelForValue(last.y), color:ds.borderColor, text:ds.endLabel }); });
+    ch.data.datasets.forEach(function(ds){ if(!ds.endLabel) return; var last=ds.data[ds.data.length-1]; if(!last) return; var parts=ds.endLabel.split(' \u2014 '); items.push({ y:y.getPixelForValue(last.y), color:ds.borderColor, l1:parts[0], l2:parts[1]||'' }); });
     if(!items.length) return;
     items.sort(function(a,b){ return a.y-b.y; });
-    var gap=15, bot=area.bottom-2;
+    var gap=26, bot=area.bottom-14;
     for(var i=1;i<items.length;i++){ if(items[i].y < items[i-1].y+gap) items[i].y=items[i-1].y+gap; }
     for(var j=items.length-1;j>0;j--){ if(items[j].y>bot){ items[j].y=bot; if(items[j-1].y>items[j].y-gap) items[j-1].y=items[j].y-gap; } }
+    if(items[0].y < area.top+14) items[0].y=area.top+14;
     ctx.save(); ctx.font='600 10.5px Arial'; ctx.textBaseline='middle'; ctx.textAlign='right'; var rx=area.right-6;
-    items.forEach(function(it){ var w=ctx.measureText(it.text).width; ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fillRect(rx-w-3, it.y-8, w+7, 16); ctx.fillStyle=solidColor(it.color); ctx.fillText(it.text, rx, it.y); });
+    items.forEach(function(it){ var w=Math.max(ctx.measureText(it.l1).width, it.l2?ctx.measureText(it.l2).width:0);
+      if(it.l2){ ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fillRect(rx-w-3, it.y-13, w+7, 26); ctx.fillStyle=solidColor(it.color); ctx.fillText(it.l1, rx, it.y-6); ctx.fillText(it.l2, rx, it.y+6); }
+      else { ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fillRect(rx-w-3, it.y-8, w+7, 16); ctx.fillStyle=solidColor(it.color); ctx.fillText(it.l1, rx, it.y); }
+    });
     ctx.restore();
   } };
   var singleGhost = { id:'singleGhost', afterDatasetsDraw:function(ch){ if(filt.basis!=='single') return; var di=findIdx('Salvo points'); if(di<0) return; var ctx=ch.ctx,x=ch.scales.x,y=ch.scales.yCost, ds=ch.data.datasets[di];
